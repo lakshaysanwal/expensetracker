@@ -1,33 +1,32 @@
 # Stage 1: Build Frontend
-FROM node:20-slim AS frontend-build
+FROM node:20 AS frontend-build
 WORKDIR /app
-# Copy only package files for efficient caching
-COPY frontend/package*.json ./
-RUN npm install --legacy-peer-deps
-# Copy all frontend files
+# Copy the frontend folder into the container
 COPY frontend/ ./
-# Run build - using CI flag to prevent some weird terminal issues
-RUN CI=true npm run build
+# Run install and build inside the folder
+RUN cd /app && npm install --legacy-peer-deps && npm run build
 
 # Stage 2: Build Backend
-FROM gradle:8-jdk17 AS backend-build
+# Using Amazon Corretto - extremely stable and widely available
+FROM amazoncorretto:17 AS backend-build
 WORKDIR /app
+# Install findutils (needed for Gradle on some Linux distros)
+RUN yum install -y findutils
 # Copy the entire backend
 COPY backend/ ./
-# Fix line endings and permissions
+# Copy built frontend from Stage 1
+RUN mkdir -p /app/src/main/resources/static
+COPY --from=frontend-build /app/dist/ /app/src/main/resources/static/
+# Fix permissions and line endings
 RUN tr -d '\r' < gradlew > gradlew.new && mv gradlew.new gradlew && chmod +x gradlew
-# Create the target directory and copy frontend files
-RUN mkdir -p src/main/resources/static
-COPY --from=frontend-build /app/dist/ src/main/resources/static/
-# Build JAR while skipping tests and using a memory-capped daemon
-RUN ./gradlew bootJar --no-daemon -x test -Dorg.gradle.jvmargs="-Xmx512m"
+# Build JAR
+RUN ./gradlew bootJar --no-daemon -x test
 
 # Stage 3: Final Production Image
-FROM eclipse-temurin:17-jre-jammy
+FROM eclipse-temurin:17-jre
 WORKDIR /app
 COPY --from=backend-build /app/build/libs/*.jar app.jar
 EXPOSE 8080
-# Explicitly tell Spring to listen on 8080 (Render requirement)
 ENV PORT=8080
-ENV JAVA_OPTS="-Xmx512m"
-ENTRYPOINT ["sh", "-c", "java $JAVA_OPTS -Dserver.port=${PORT} -jar app.jar"]
+# Use simple exec form for entrypoint
+ENTRYPOINT ["java", "-jar", "app.jar", "--server.port=8080"]
