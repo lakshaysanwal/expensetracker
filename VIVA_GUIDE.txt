@@ -61,6 +61,33 @@ Key Components:
     2. It puts those files inside the Java app.
     3. It creates one single package (JAR file) that can run anywhere.
 - Render: We linked the GitHub repo to Render, which reads our Dockerfile and puts the app on a live URL.
+---
+How to Run the Project
+1. Start the Backend (Spring Boot)
+The backend is the brain of the app. It handles security, databases, and business logic.
+
+Prerequisites: Java JDK 17 or higher.
+Command:
+Open a terminal in the backend folder.
+Run:
+bash
+./gradlew bootRun
+(On Windows, use .\gradlew.bat bootRun)
+Note: The backend uses an H2 In-Memory Database, so no separate database installation (like MySQL) is required. Data is stored in RAM while the app is running.
+2. Start the Frontend (React + Vite)
+The frontend is the visual interface.
+
+Prerequisites: Node.js installed.
+Commands:
+Open a terminal in the frontend folder.
+Install dependencies (only required the first time):
+bash
+npm install
+Start the development server:
+bash
+npm run dev
+Access: Open your browser to http://localhost:5173.
+----
 
 ---
 6. 🔥 POTENTIAL VIVA QUESTIONS & ANSWERS
