@@ -1,28 +1,29 @@
 # Stage 1: Build Frontend
 FROM node:18-alpine AS frontend-build
-WORKDIR /app/frontend
+WORKDIR /app
+# Only copy package files first for faster caching
 COPY frontend/package*.json ./
-# Use --legacy-peer-deps to avoid common environment conflicts
 RUN npm install --legacy-peer-deps
+# Copy everything else and build
 COPY frontend/ ./
 RUN npm run build
 
 # Stage 2: Build Backend
 FROM gradle:8-jdk17 AS backend-build
-WORKDIR /app/backend
+WORKDIR /app
+# Copy the entire backend folder contents into the workdir
 COPY backend/ ./
-# IMPORTANT: Give execution permission for the build on Linux
-RUN chmod +x gradlew
-# Copy built frontend from Stage 1 into the backend static resources
-COPY --from=frontend-build /app/frontend/dist /app/backend/src/main/resources/static
-# Build the backend (skip tests to speed up the deploy)
+# FIX: Clean up Windows line endings (CRLF -> LF) and set permissions
+RUN tr -d '\r' < gradlew > gradlew.new && mv gradlew.new gradlew && chmod +x gradlew
+# Move frontend build into backend resources
+COPY --from=frontend-build /app/dist ./src/main/resources/static/
+# Build the JAR
 RUN ./gradlew bootJar --no-daemon -x test
 
 # Stage 3: Final Production Image
 FROM openjdk:17-jdk-slim
 WORKDIR /app
-COPY --from=backend-build /app/backend/build/libs/*.jar app.jar
+COPY --from=backend-build /app/build/libs/*.jar app.jar
 EXPOSE 8080
-# Set environment variable to make sure Spring runs on Port 8080 (Render's default)
 ENV PORT=8080
-ENTRYPOINT ["java", "-Xmx512m", "-jar", "app.jar"]
+ENTRYPOINT ["java", "-Xmx512m", "-Dserver.port=${PORT}", "-jar", "app.jar"]
