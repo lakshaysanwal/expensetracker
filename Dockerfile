@@ -1,5 +1,6 @@
 # Stage 1: Build Frontend
-FROM node:18-alpine AS frontend-build
+# Upgrade to Node 20 as required by Vite 8
+FROM node:20-alpine AS frontend-build
 WORKDIR /app
 COPY frontend/package*.json ./
 RUN npm install --legacy-peer-deps
@@ -17,7 +18,7 @@ COPY --from=frontend-build /app/dist ./src/main/resources/static/
 # Build the JAR
 RUN ./gradlew bootJar --no-daemon -x test
 
-# Stage 3: Final Production Image (Using Eclipse Temurin - the modern standard)
+# Stage 3: Final Production Image
 FROM eclipse-temurin:17-jre-jammy
 WORKDIR /app
 COPY --from=backend-build /app/build/libs/*.jar app.jar
