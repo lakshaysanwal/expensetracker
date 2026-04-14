@@ -1,0 +1,85 @@
+============================================================
+🎓 DIGITAL EXPENSE TRACKER - VIVA & PROJECT GUIDE 🎓
+============================================================
+
+Greetings! Use this guide to understand exactly how your project works. 
+If an examiner asks "How did you build this?", use these points.
+
+---
+1. 📝 OVERVIEW
+---
+This is a Full-Stack Web Application. 
+- The Frontend (what the user sees) is built with React.
+- The Backend (the logic) is built with Spring Boot.
+- The Database (where data is stored) is H2 (In-memory).
+
+---
+2. 🧠 BACKEND (The "Brain" - Spring Boot)
+---
+The backend handles security, users, and all expense data.
+
+Key Parts:
+- Controller: These are the "Entry Points." 
+    * AuthController handles login/signup.
+    * ExpenseController handles adding/viewing expenses.
+- Model: These define what a "User" and an "Expense" look like in the database.
+- Repository: This is the part that talks to the Database using JPA (Java Persistence API).
+- Security (JWT): This is the most important part!
+    * We use JWT (JSON Web Tokens). 
+    * When a user logs in, the server gives them a "Token" (a long secret string). 
+    * The user must send this token back in every request to prove they are logged in.
+- H2 Database: It is an "In-memory" database. It is fast and requires no external installation (like MySQL) because it runs inside the Java app.
+
+---
+3. 🎨 FRONTEND (The "Face" - React)
+---
+The frontend is built for a premium user experience.
+
+Key Components:
+- App.jsx: The main file that sets up navigation (Routing).
+- Login / Signup.jsx: Interactive forms to enter the app.
+- Dashboard.jsx: The home screen that shows your total balance and statistics.
+- ExpenseChart.jsx: Uses a library called "Recharts" to draw the Category Pie Chart.
+- ExpenseForm.jsx: Where users type in their expenses.
+- Redux (State Management): We use Redux Toolkit. 
+    * It's like a "Global Brain" for the frontend. 
+    * It remembers if you are logged in or what your expenses are as you move between different pages.
+
+---
+4. 🔗 INTEGRATION (How they talk to each other)
+---
+- Protocol: The Frontend sends "HTTP Requests" to the Backend.
+- AXIOS: We use a library called Axios to make these calls.
+- JWT Header: For every request (like "Get my expenses"), the frontend puts the JWT token in the "Authorization Header" so the backend knows which user is asking.
+- Proxy: During development, we used a Vite Proxy to avoid CORS errors. In production (Render), they live on the same port (8080) for simplicity.
+
+---
+5. 🚢 DEPLOYMENT (How it is hosted)
+---
+- Docker: We used a "Multi-stage Dockerfile." 
+    1. It builds the React files first.
+    2. It puts those files inside the Java app.
+    3. It creates one single package (JAR file) that can run anywhere.
+- Render: We linked the GitHub repo to Render, which reads our Dockerfile and puts the app on a live URL.
+
+---
+6. 🔥 POTENTIAL VIVA QUESTIONS & ANSWERS
+---
+Q: Why did you use Spring Boot?
+A: Because it is robust, has built-in security features, and is the industry standard for enterprise backends.
+
+Q: What is a "Stateless" application?
+A: It means the server doesn't "remember" the user via a session. Instead, every request from the client must include a JWT token to identify the user.
+
+Q: How do you handle Data Isolation?
+A: In the ExpenseController, we always fetch the userID from the security context so one user can never see another user's expenses.
+
+Q: What is the benefit of H2 Database?
+A: It's excellent for development and small projects because it requires zero configuration and is incredibly fast.
+
+Q: How is the chart updated?
+A: When a new expense is added, Redux detects the change in state, and React automatically re-renders the Chart component with the new data.
+
+============================================================
+GOOD LUCK WITH YOUR VIVA! YOU'VE GOT THIS! 🚀
+============================================================
