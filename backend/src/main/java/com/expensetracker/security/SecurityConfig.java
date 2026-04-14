@@ -33,6 +33,12 @@ public class SecurityConfig {
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers(org.springframework.security.web.util.matcher.AntPathRequestMatcher.antMatcher("/api/auth/**")).permitAll()
                 .requestMatchers(org.springframework.security.web.util.matcher.AntPathRequestMatcher.antMatcher("/")).permitAll()
+                .requestMatchers(org.springframework.security.web.util.matcher.AntPathRequestMatcher.antMatcher("/index.html")).permitAll()
+                .requestMatchers(org.springframework.security.web.util.matcher.AntPathRequestMatcher.antMatcher("/assets/**")).permitAll()
+                .requestMatchers(org.springframework.security.web.util.matcher.AntPathRequestMatcher.antMatcher("/favicon.svg")).permitAll()
+                .requestMatchers(org.springframework.security.web.util.matcher.AntPathRequestMatcher.antMatcher("/icons.svg")).permitAll()
+                .requestMatchers(org.springframework.security.web.util.matcher.AntPathRequestMatcher.antMatcher("/login")).permitAll()
+                .requestMatchers(org.springframework.security.web.util.matcher.AntPathRequestMatcher.antMatcher("/signup")).permitAll()
                 .requestMatchers(org.springframework.security.web.util.matcher.AntPathRequestMatcher.antMatcher("/error")).permitAll()
                 .requestMatchers(org.springframework.security.web.util.matcher.AntPathRequestMatcher.antMatcher("/h2-console/**")).permitAll()
                 .anyRequest().authenticated()
